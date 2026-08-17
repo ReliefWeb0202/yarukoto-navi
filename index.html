@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>できそう！やることナビ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;800&display=swap" rel="stylesheet">
+
+<!-- デザイン・テーマ設定 -->
+<link rel="stylesheet" href="style.css">
+<!-- PWA Manifest の読み込み -->
+<link rel="manifest" href="manifest.json">
+<!-- ★修正：標準のWebアプリ化メタタグ（非推奨警告の対策） -->
+<meta name="mobile-web-app-capable" content="yes">
+<!-- ★追加：タブ用アイコン（404エラー対策） -->
+<link rel="icon" href="/app/icon/icon-192.png" type="image/png">
+<!-- iOS Safari用設定（そのまま残してOK） -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="/app/icon/icon-192.png">
+<!-- テーマカラー -->
+<meta name="theme-color" content="#4f46e5">
+</head>
+
+<body>
+<!-- メインコンテンツ全体領域 -->
+<main class="container">
+<!-- 共通ヘッダー -->
+<header>
+	<h1>できそう！やることナビ</h1>
+	<div class="header-actions">
+	<button id="theme-toggle-btn" class="icon-btn" title="テーマ切り替え">ダークモード</button>
+	<button id="open-settings-btn" class="icon-btn" title="APIキー設定">設定</button>
+	</div>
+</header>
+
+<!-- 画面1: 目標入力・AI生成ビュー -->
+<section id="setup-view" class="view active">
+	<div class="card">
+		<div class="form-group">
+		<label for="goal-input">あなたの達成したい目標は？</label>
+		<input type="text" id="goal-input" placeholder="例：〇〇試験に合格する">
+		</div>
+<!-- 難易度の選択 -->
+		<div class="form-group">
+			<label for="difficulty-select">難易度（詳細さ）:</label>
+			<select id="difficulty-select" class="input-field">
+			<option value="easy">初心者向け（細かく丁寧に分解）</option>
+			<option value="standard" selected>標準（バランス重視）</option>
+			<option value="compact">要点のみ（大まかなステップ）</option>
+			</select>
+		</div>
+	<!-- 期間の選択 -->
+		<div class="form-group">
+			<label for="timeframe-select">重点期間:</label>
+			<select id="timeframe-select" class="input-field">
+			<option value="all" selected>準備～当日まで全体</option>
+			<option value="prep">前日までの準備メイン</option>
+			<option value="today">当日・直前のアクションメイン</option>
+			</select>
+		</div>
+		<div class="form-row">
+	<div class="form-group">
+		<label for="granularity-select">分解の細かさ:</label>
+		<select id="granularity-select" class="input-field">
+			<option value="coarse">ざっくり（3～5個・要点のみ）</option>
+			<option value="standard" selected>標準（5～8個・バランス重視）</option>
+			<option value="detailed">細かく（8～12個・具体的な行動単位）</option>
+		</select>
+	</div>
+	<!-- 日付側にも label を追加して高さを揃える -->
+	<div class="form-group">
+		<label for="target-date">目標期日:</label>
+		<input type="date" id="target-date" class="input-field">
+	</div>
+</div>
+		<button id="generate-btn" class="btn-primary">
+			<span>やることリストを作成</span>
+		</button>
+		<!-- 通信中メッセージ -->
+		<p id="loading" class="loading-spinner">Gemini AIがタスクを生成中...</p>
+	</div>
+</section>
+
+<!-- 画面2: カウントダウン ＆ TODOリスト表示ビュー -->
+<section id="task-view" class="view">
+<!-- 現在の目標表示 ＆ 戻るボタン -->
+	<div class="current-goal-bar">
+		<div>
+		<span class="help-text">現在の目標:</span>
+		<p id="display-goal-text" class="goal-display-text">-</p>
+		</div>
+	<button id="back-to-setup-btn" class="btn-small">目標を変更</button>
+	</div>
+
+<!-- カウントダウン -->
+	<div class="countdown-card">
+		<p class="countdown-title">目標期日まで残り</p>
+		<div class="countdown-timer">
+			<div class="time-unit">
+			<span class="time-value" id="cd-days">00</span>
+			<span class="time-label">日</span>
+			</div>
+			<span class="time-value">:</span>
+			<div class="time-unit">
+			<span class="time-value" id="cd-hours">00</span>
+			<span class="time-label">時間</span>
+			</div>
+			<span class="time-value">:</span>
+			<div class="time-unit">
+			<span class="time-value" id="cd-minutes">00</span>
+			<span class="time-label">分</span>
+			</div>
+		</div>
+	</div>
+
+<!-- TODOリスト -->
+	<div class="todo-section-container">
+		<div class="todo-header">
+		<h2>やることリスト</h2>
+		<span id="todo-count" class="help-text">0/0 完了</span>
+		</div>
+		<ul id="todo-list" class="todo-list">
+		</ul>
+
+	<!-- 手動追加フォーム -->
+		<form class="add-manual-container" onsubmit="return false;">
+			<input type="text" id="manual-input" placeholder="自分でタスクを追加...">
+			<button type="button" id="add-manual-btn" class="btn-secondary">追加</button>
+		</form>
+	</div>
+</section>
+</main>
+
+<!-- APIキー設定モーダル -->
+<dialog id="settings-modal" class="modal-overlay">
+	<div class="modal-content">
+		<div class="modal-header">
+			<h3>Gemini APIキー設定</h3>
+			<button id="close-modal-btn" class="btn-small">X</button>
+		</div>
+		<div class="form-group">
+			<label for="api-key-input">あなたの Gemini API Key</label>
+			<input type="text" id="api-key-input" placeholder="AIzaSy...">
+			<p class="help-text">キーは外部に送信されず、お使いのブラウザ内（LocalStorage）にのみ保持されます。<br>
+			<a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a> で無料取得できます。
+			</p>
+		</div>
+	<footer class="modal-footer">
+		<button id="delete-key-btn" class="btn-small delete">削除</button>
+		<button id="save-key-btn" class="btn-primary" style="width: auto;">保存する</button>
+	</footer>
+	</div>
+</dialog>
+<!-- 外部JavaScriptファイルの読み込み -->
+<script src="app.js"></script>
+</body>
+</html>
