@@ -1,5 +1,5 @@
 // sw.js (最小限のService Workerファイル)
-const CACHE_NAME = 'ai-task-app-v1';
+const CACHE_NAME = 'ai-task-app-v2';
 const urlsToCache = [
   './',
   './index.html',
