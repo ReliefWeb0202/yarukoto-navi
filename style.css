@@ -1,37 +1,40 @@
 /* ==========================================================================
-   1. CSS変数定義（テーマ切り替え・配色管理）
+   1. CSS変数定義（カラー・デザインシステム）
    ========================================================================== */
 :root {
-  /* ライトモード（デフォルト） */
-  --bg-main: #cae5d3;
-  --bg-card: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
+  /* ライトモード（手帳＆直角付箋風カラー） */
+  --bg-main: #fbf7ee;        /* 手帳っぽい温かみのある生成り色 */
+  --bg-card: #fffbeb;        /* 付箋っぽいクリームイエロー */
+  --text-main: #292524;      /* くっきり読みやすい濃いブラウンブラック */
+  --text-muted: #78716c;     /* 落ち着いたミディアムブラウン */
+  --border-color: #fde68a;   /* 付箋になじむ柔らかなイエロー枠線 */
   
-  /* ポップなアクセントカラー（インディゴ/パープル系） */
-  --accent-color: #6366f1;
-  --accent-hover: #4f46e5;
-  --accent-light: #e0e7ff;
+  /* 方眼（マス目）の線の色 */
+  --note-line: rgba(217, 119, 6, 0.12);
+  
+  /* アクセントカラー（オレンジ系） */
+  --accent-color: #ea580c;
+  --accent-hover: #c2410c;
+  --accent-light: #fef3c7;
   
   /* ステータスカラー */
   --danger-color: #ef4444;
-  --success-color: #22c55e;
+  --success-color: #10b981;
   
-  /* 角丸・影の設定 */
-  --radius: 12px;
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  /* 角丸の設定（四角にするため0pxに指定） */
+  --radius: 0px;
+  --radius-sm: 0px;
 }
 
-/* ダークモード定義 */
+/* ダークモード定義（黒板に貼り付けた付箋風） */
 [data-theme="dark"] {
-  --bg-main: #0f172a;
-  --bg-card: #1e293b;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border-color: #334155;
-  --accent-light: #312e81;
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --bg-main: #18181b;        /* 黒板のようなダークグレー */
+  --bg-card: #27272a;        /* 少し明るいグレー付箋 */
+  --text-main: #f5f5f4;      /* 白文字 */
+  --text-muted: #a8a29e;     /* くっきりグレー */
+  --border-color: #3f3f46;
+  --note-line: rgba(255, 255, 255, 0.05);
+  --accent-light: #292524;
 }
 
 /* ==========================================================================
@@ -41,21 +44,27 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', '平角ゴ ProN W3', sans-serif;
+  font-family: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Meiryo UI', sans-serif;
 }
 
+/* 手帳（生成り＋方眼ノート）の背景 */
 body {
   background-color: var(--bg-main);
+  background-image: 
+    linear-gradient(var(--note-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--note-line) 1px, transparent 1px);
+  background-size: 20px 20px;
   color: var(--text-main);
   line-height: 1.6;
-  transition: background-color 0.3s, color 0.3s;
-  padding-bottom: 40px;
+  letter-spacing: 0.01em;
+  transition: background-color 0.2s, color 0.2s;
+  padding-bottom: 60px;
 }
 
 .container {
   max-width: 600px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 20px;
 }
 
 /* ==========================================================================
@@ -65,17 +74,15 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--border-color);
+  padding: 24px 0 16px 0;
   margin-bottom: 24px;
 }
 
 header h1 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
 }
 
 .header-actions {
@@ -85,43 +92,58 @@ header h1 {
 
 .icon-btn {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  border: 1.5px solid var(--border-color);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.06);
   color: var(--text-main);
-  padding: 8px 12px;
-  border-radius: var(--radius);
+  padding: 8px 14px;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: all 0.15s ease;
 }
 
 .icon-btn:hover {
-  background-color: var(--border-color);
+  transform: translateY(-2px);
+  box-shadow: 2px 4px 0 rgba(0,0,0,0.1);
 }
 
 /* ==========================================================================
-   4. カウントダウンエリア
+   4. カウントダウンエリア（付箋風カード）
    ========================================================================== */
 .countdown-card {
   background: var(--bg-card);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   padding: 20px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border-color);
+  border-left: 6px solid var(--accent-color); /* 付箋の見出しテープ風 */
+  border-top: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.07);
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  transform: none; /* 付箋っぽくほんのり傾ける */
+  transition: none;
+}
+
+.countdown-card:hover {
+  transform: none;
 }
 
 .countdown-title {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  font-weight: 500;
   color: var(--text-muted);
-  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
 }
 
 .countdown-timer {
   display: flex;
   justify-content: center;
   align-items: baseline;
-  gap: 12px;
+  gap: 16px;
 }
 
 .time-unit {
@@ -131,53 +153,66 @@ header h1 {
 }
 
 .time-value {
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 2.2rem;
+  font-weight: 900;
   color: var(--accent-color);
+  line-height: 1;
 }
 
 .time-label {
   font-size: 0.75rem;
+  font-weight: 500;
   color: var(--text-muted);
+  margin-top: 4px;
 }
 
 /* ==========================================================================
-   5. 入力 ＆ AI生成カード
+   5. 入力 ＆ AI生成カード（メイン付箋）
    ========================================================================== */
 .card {
   background: var(--bg-card);
-  border-radius: var(--radius);
-  padding: 20px;
-  box-shadow: var(--shadow);
+  border-radius: var(--radius-sm);
+  padding: 24px;
   border: 1px solid var(--border-color);
+  /* 右下だけ少し折れ曲がったような影 */
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.08);
   margin-bottom: 24px;
+  transform: none;
+  transition: none;
+}
+
+.card:hover {
+  transform: none;
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .form-group label {
   display: block;
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin-bottom: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text-main);
 }
 
 input[type="text"], input[type="date"], select {
   width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-sm);
   background: var(--bg-main);
   color: var(--text-main);
-  font-size: 1rem;
+  font-size: 0.95rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s ease;
 }
 
-input[type="text"]:focus, select:focus {
+input[type="text"]:focus, input[type="date"]:focus, select:focus {
   border-color: var(--accent-color);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px var(--accent-light);
 }
 
 .form-row {
@@ -185,17 +220,19 @@ input[type="text"]:focus, select:focus {
   gap: 12px;
 }
 
+/* ぷっくり押し込める丸ボタン */
 .btn-primary {
   width: 100%;
-  background-color: var(--accent-color);
+  background: var(--accent-color);
   color: white;
-  border: none;
+  border: 2px solid #c2410c;
   padding: 14px;
-  border-radius: var(--radius);
+  border-radius: 30px;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  transition: background-color 0.2s;
+  box-shadow: 0 4px 0 #9a3412;
+  transition: all 0.15s ease;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -203,105 +240,155 @@ input[type="text"]:focus, select:focus {
 }
 
 .btn-primary:hover {
-  background-color: var(--accent-hover);
+  background: #f97316;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #9a3412;
 }
 
-/* 通信中のローディング表示 */
-.loading-spinner {
-  display: none;
-  text-align: center;
-  margin-top: 12px;
-  color: var(--accent-color);
-  font-size: 0.875rem;
-  font-weight: 600;
+.btn-primary:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #9a3412;
 }
 
 /* ==========================================================================
-   6. TODOリストエリア
+   6. TODOリストエリア（ミニ付箋たち）
    ========================================================================== */
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.section-header h2 {
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
 .todo-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
+/* 各タスクも小さな付箋紙のデザイン */
 .todo-item {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
+  border-left: 4px solid #f59e0b; /* 黄色いミニ付箋風見出し */
+  border-top: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0px;
   padding: 14px 16px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  box-shadow: var(--shadow);
-  transition: transform 0.1s;
+  box-shadow: 2px 3px 6px rgba(0,0,0,0.05);
+  transition: none;
 }
 
-.todo-item.completed span {
-  text-decoration: line-through;
-  color: var(--text-muted);
-}
-
-.todo-checkbox {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--accent-color);
-  cursor: pointer;
-}
-
-.todo-text {
+/* タスク本文エリアを自動で広げてボタンを右端に押し出す */
+.todo-text, .todo-content, .todo-item span, .todo-item label {
   flex: 1;
-  font-size: 0.95rem;
+  min-width: 0; /* 文字長によるレイアウト崩れ防止 */
 }
 
-.todo-actions {
+/* ボタン群のグループ */
+.todo-actions, .todo-item > div:last-child {
   display: flex;
+  align-items: center;
   gap: 6px;
+  margin-left: auto; /* 右端に完全固定 */
+  flex-shrink: 0;    /* ボタン群が縮むのを防止 */
 }
 
-.btn-small {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 4px 8px;
+/* 各操作ボタン（上下・編集・削除など）の余白とデザイン */
+.todo-actions button,
+.todo-btn,
+.todo-item button {
+  padding: 4px 10px; /* 上下4px, 左右10pxのパディングを入れる */
+  font-size: 0.8rem;
   border-radius: 4px;
-  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap; /* ボタン内テキストの改行を防止 */
 }
 
-.btn-small:hover {
-  background: var(--border-color);
-  color: var(--text-main);
+.todo-item:nth-child(even),
+.todo-item:nth-child(odd) {
+  transform: none;
 }
 
-.btn-small.delete:hover {
-  background: var(--danger-color);
-  color: white;
+.todo-item:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 3px 5px 10px rgba(0,0,0,0.1);
 }
 
-/* 手動追加フォーム */
-.add-manual-container {
+.todo-item.completed {
+  opacity: 0.5;
+  background: var(--bg-main);
+  border-left-color: var(--text-muted);
+  transform: rotate(0deg);
+  box-shadow: none;
+}
+
+.section-header {
   display: flex;
-  gap: 8px;
-  margin-top: 16px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
 }
 
-/* ==========================================================================
-   7. APIキー設定モーダル
-   ========================================================================== */
+.section-header h2 {
+  font-size: 1.0rem;
+  font-weight: 500;
+}
+
+/* --------------------------------------------------
+   タスク追加エリア（横並び強制 ＆ デザイン固定）
+   -------------------------------------------------- */
+/* クラス名・タグ構造を広くカバーして確実に横並びにする */
+.add-todo-form, 
+form[id*="todo"],
+.add-todo-container,
+.add-todo-box {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 16px !important;
+  width: 100% !important;
+}
+
+/* 入力欄を横幅いっぱいに伸ばす */
+.add-todo-form input,
+form[id*="todo"] input,
+.add-todo-container input,
+.add-todo-box input {
+  flex: 1 !important;
+  width: auto !important;
+  height: 42px !important;
+  padding: 0 14px !important;
+  font-size: 0.9rem !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-sm) !important;
+  background: var(--bg-main) !important;
+  color: var(--text-main) !important;
+}
+
+/* 追加ボタンの高さ合わせと余白の設定 */
+.add-todo-form button,
+form[id*="todo"] button,
+.add-todo-container button,
+.add-todo-box button {
+  height: 42px !important;
+  padding: 0 18px !important;
+  white-space: nowrap !important;
+  background: var(--accent-color) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--accent-hover) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+}
+
+.add-todo-form button:hover,
+form[id*="todo"] button:hover,
+.add-todo-container button:hover,
+.add-todo-box button:hover {
+  background: var(--accent-hover) !important;
+}
 /* ==========================================================================
    7. APIキー設定モーダル
    ========================================================================== */
@@ -313,88 +400,138 @@ input[type="text"]:focus, select:focus {
   height: 100vh;
   border: none;
   background: transparent;
-  padding: 16px;
+  padding: 20px;
   z-index: 1000;
 }
 
-/* dialog要素が開いている時（open属性が付与された時）だけ表示 */
 .modal-overlay[open] {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* モーダル表示時の背景（暗がり）を設定 */
 .modal-overlay::backdrop {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(28, 25, 23, 0.5);
+  backdrop-filter: blur(4px);
 }
 
 .modal-content {
   background: var(--bg-card);
-  padding: 24px;
+  padding: 28px;
   border-radius: var(--radius);
   max-width: 480px;
   width: 100%;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border-color);
+  border: var(--pop-border);
+  box-shadow: 0 8px 0 #fed7aa;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
 }
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 20px;
-}
-
-.btn-secondary {
-  background: var(--border-color);
-  color: var(--text-main);
-  border: none;
-  padding: 10px 16px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  font-weight: 600;
+  gap: 10px;
+  margin-top: 24px;
 }
 
 .help-text {
   font-size: 0.8rem;
   color: var(--text-muted);
-  margin-top: 6px;
+  margin-top: 8px;
+  line-height: 1.5;
 }
+
 /* ==========================================================================
    8. ビュー切り替え（画面遷移）制御
    ========================================================================== */
 .view {
-  display: none; /* 基本は非表示 */
+  display: none;
 }
 
 .view.active {
-  display: flex; /* アクティブなビューのみ表示 */
+  display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* 現在の目標表示バー */
 .current-goal-bar {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  border: var(--pop-border);
   border-radius: var(--radius);
-  padding: 12px 16px;
+  padding: 14px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  box-shadow: 3px 3px 6px rgba(0,0,0,0.05);
+  transform: none;
 }
 
 .goal-display-text {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--accent-color);
+  font-weight: 500;
+  font-size: 1.25rem;
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   タスク追加フォーム（.add-manual-container）のレイアウト＆ボタン調整
+   ========================================================================== */
+
+/* フォーム全体の横並び制御 */
+form.add-manual-container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 16px !important;
+  width: 100% !important;
+}
+
+/* 入力インプットの伸縮 */
+form.add-manual-container #manual-input {
+  flex: 1 !important;
+  width: auto !important;
+  height: 42px !important;
+  padding: 0 14px !important;
+  font-size: 0.9rem !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-sm) !important;
+  background: var(--bg-main) !important;
+  color: var(--text-main) !important;
+}
+
+/* 追加ボタン（btn-secondary の上書き） */
+form.add-manual-container #add-manual-btn.btn-secondary {
+  height: 42px !important;
+  padding: 0 20px !important;            /* ボタン内に左右の十分な余白を設定 */
+  min-width: 64px !important;             /* ボタンが小さくなりすぎるのを防止 */
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-sm) !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;              /* つぶれるのを防止 */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 0.15s ease !important;
+}
+
+/* ボタンホバー時 */
+form.add-manual-container #add-manual-btn.btn-secondary:hover {
+  background: var(--accent-light) !important;
+  border-color: var(--accent-color) !important;
 }
