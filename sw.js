@@ -2,11 +2,13 @@
 const CACHE_NAME = 'ai-task-app-v3';
 
 const urlsToCache = [
-  './',
-  './index.html',
-  './style.css',
-  './app.js',
-  './manifest.json'
+	'./',
+	'./index.html',
+	'./style.css',
+	'./app.js',
+	'./manifest.json',
+	'./icon/icon-192.png',
+	'./icon/icon-512.png'
 ];
 
 // インストール時に即座に新しいService Workerを有効化
